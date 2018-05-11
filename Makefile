@@ -32,6 +32,9 @@ uninstall:
 sdist:
 	python3 setup.py sdist
 
+upload: sdist
+	twine upload dist/*
+
 doc:	$(DOCOUT)
 
 check:

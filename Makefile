@@ -28,8 +28,8 @@ uninstall:
 	    /usr/lib/python*/site-packages/*$(NAME)* \
 	    /usr/lib/python*/site-packages/*/*$(NAME)*
 
-upload:
-	python3 setup.py sdist upload
+sdist:
+	python3 setup.py sdist
 
 doc:	$(DOCOUT)
 

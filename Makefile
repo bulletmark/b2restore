@@ -25,6 +25,7 @@ install:
 
 uninstall:
 	@rm -vrf /usr/bin/$(NAME)* /etc/$(NAME).conf \
+	    /usr/share/doc/$(NAME) \
 	    /usr/lib/python*/site-packages/*$(NAME)* \
 	    /usr/lib/python*/site-packages/*/*$(NAME)*
 

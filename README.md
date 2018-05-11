@@ -6,6 +6,9 @@ B2 archive for a given date+time.
 
 ### INSTALLATION
 
+Arch users can install [_b2restore from the
+AUR_](https://aur.archlinux.org/packages/b2restore/).
+
 Requires python 3.5+. You can `sudo pip install b2restore` or:
 
 ```

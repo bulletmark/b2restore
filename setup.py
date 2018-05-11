@@ -12,18 +12,16 @@ readme = here.joinpath('README.md').read_text()
 
 setup(
     name=name,
-    version='1.0',
+    version='1.1',
     description='Program to recreate Backblaze B2 file archive at'
             'specified date+time',
     long_description=readme,
+    long_description_content_type="text/markdown",
     url=f'https://github.com/bulletmark/{name}',
     author='Mark Blakeney',
     author_email='mark@irsaere.net',
-    classifiers=[
-        'License :: OSI Approved :: GPL-3.0',
-        'Programming Language :: Python :: 3',
-    ],
     keywords='backblaze b2',
+    license = 'GPLv3',
     py_modules=[name],
     data_files=[
         (f'share/doc/{name}', ['README.md']),

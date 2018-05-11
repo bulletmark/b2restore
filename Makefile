@@ -29,7 +29,7 @@ uninstall:
 	    /usr/lib/python*/site-packages/*/*$(NAME)*
 
 upload:
-	$(PYTHON) setup.py sdist upload
+	python3 setup.py sdist upload
 
 doc:	$(DOCOUT)
 

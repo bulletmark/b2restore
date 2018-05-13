@@ -30,24 +30,25 @@ mkdir b2files
 rclone sync --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files
 ```
 
-The run this utility to create a snapshot of the directory tree for the
+Then run this utility to create a snapshot of the directory tree for the
 file versions you are interested in.
 
-E.g. to get the latest files:
+E.g. to recreate the tree of latest files:
 
 ```
 b2restore b2files outdir
 ```
 
-E.g. to get the files at a specified time:
+E.g. to recreate the tree of files at a specified time:
 
 ```
 b2restore -t 2018-01-01T09:10:00 b2files outdir
 ```
 
+Just keep selecting different times to incrementally recreate `outdir`.
 The utility prints a line for each file updated, created, or deleted
-in outdir compared to the previous contents. The date+time of the file
-is also listed.
+in `outdir` compared to the previous contents. The date+time of each
+updated/created/deleted file is also listed.
 
 ```
 usage: b2restore [-h] [-t TIME] [-f FILETIME] indir outdir

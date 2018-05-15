@@ -6,8 +6,8 @@ B2 archive for a given date+time.
 
 ### INSTALLATION
 
-Arch users can install [_b2restore from the
-AUR_](https://aur.archlinux.org/packages/b2restore/).
+Arch users can install [b2restore from the
+AUR](https://aur.archlinux.org/packages/b2restore/).
 
 Requires python 3.5+. Note [b2restore is on
 PyPI](https://pypi.org/project/b2restore/) so you can `sudo pip install
@@ -21,8 +21,9 @@ $ sudo make install
 
 ### USAGE
 
-Simply clone or copy the B2 bucket or sub paths which you want to restore
-but ensure you specify `--b2-versions` to include all file versions,
+Simply clone or copy the B2 bucket or sub paths from the bucket which
+you want to restore. You **MUST** specify `--b2-versions` to include
+all file versions,
 e.g:
 
 ```

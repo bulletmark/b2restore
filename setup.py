@@ -12,7 +12,7 @@ readme = here.joinpath('README.md').read_text()
 
 setup(
     name=name,
-    version='1.2',
+    version='1.2.1',
     description='Program to recreate Backblaze B2 file archive at'
             'specified date+time',
     long_description=readme,
@@ -23,6 +23,10 @@ setup(
     keywords='backblaze b2',
     license = 'GPLv3',
     py_modules=[name],
+    python_requires='>=3.4',
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        ],
     data_files=[
         (f'share/doc/{name}', ['README.md']),
     ],

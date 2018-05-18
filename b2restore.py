@@ -8,28 +8,8 @@ from bisect import bisect_left
 
 TIMEFMT = '%Y-%m-%dT%H:%M.%S'
 
-# Process command line options
-opt = argparse.ArgumentParser(description=__doc__.strip())
-opt.add_argument('-t', '--time',
-        help='set time YYYY-MM-DDTHH:MM.SS, default=latest')
-opt.add_argument('-f', '--filetime',
-        help='set time based on specified file')
-opt.add_argument('indir',
-        help='input B2 archive containing all file versions '
-        ' (from --b2-versions)')
-opt.add_argument('outdir',
-        help='output directory to recreate for given time')
-args = opt.parse_args()
-
-indir = Path(args.indir)
-outdir = Path(args.outdir)
-
-if args.filetime:
-    argstime = Path(args.filetime).stat().st_mtime
-elif args.time:
-    argstime = time.mktime(time.strptime(args.time, TIMEFMT))
-else:
-    argstime = None
+indir = None
+outdir = None
 
 class FileName():
     'Class to manage canonical file paths'
@@ -90,7 +70,7 @@ def copyfile(fp, infile, outfile):
         outfile.parent.mkdir(parents=True, exist_ok=True)
 
     date = time.strftime(TIMEFMT, time.localtime(fp.time))
-    print(f'{action} {date}: {fp.name}')
+    print('{} {}: {}'.format(action, date, fp.name))
     os.link(infile, outfile)
 
 valid = set()
@@ -99,11 +79,40 @@ def delfile(path):
     ipath = path.relative_to(outdir)
     if str(ipath) not in valid:
         date = time.strftime(TIMEFMT, time.localtime(path.stat().st_mtime))
-        print(f'deleting {date}: {ipath}')
+        print('deleting {}: {}'.format(date, ipath))
         path.unlink()
 
 def main():
     'Main code'
+    global indir, outdir
+
+    # Process command line options
+    opt = argparse.ArgumentParser(description=__doc__.strip())
+    opt.add_argument('-t', '--time',
+            help='set time YYYY-MM-DDTHH:MM.SS, default=latest')
+    opt.add_argument('-f', '--filetime',
+            help='set time based on specified file')
+    opt.add_argument('indir',
+            help='input B2 archive containing all file versions '
+            ' (from --b2-versions)')
+    opt.add_argument('outdir',
+            help='output directory to recreate for given time')
+    args = opt.parse_args()
+
+    indir = Path(args.indir)
+    outdir = Path(args.outdir)
+
+    if args.filetime:
+        afile = Path(args.filetime)
+        if not afile.exists():
+            opt.error('{} does not exist'.format(args.filetime))
+
+        argstime = afile.stat().st_mtime
+    elif args.time:
+        argstime = time.mktime(time.strptime(args.time, TIMEFMT))
+    else:
+        argstime = None
+
     # Parse all files in the versioned indir
     parsedir(indir, parsefile)
 
@@ -138,7 +147,7 @@ def main():
             dird = Path(root, name)
             if not any(dird.iterdir()) and dird != outdir:
                 subdir = dird.relative_to(outdir)
-                print(f'deleting empty {subdir}')
+                print('deleting empty {}'.format(subdir))
                 dird.rmdir()
 
 if __name__ == '__main__':

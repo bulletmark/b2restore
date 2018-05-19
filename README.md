@@ -47,9 +47,16 @@ b2restore -t 2018-01-01T09:10:00 b2files outdir
 ```
 
 Just keep selecting different times to incrementally recreate `outdir`.
-The utility prints a line for each file updated, created, or deleted
-in `outdir` compared to the previous contents. The date+time of each
+The utility prints a line for each file updated, created, or deleted in
+`outdir` compared to the previous contents. The date+time of each
 updated/created/deleted file is also listed.
+
+Rather than specifying an explicit time string using `-t/--time`, you
+can instead choose to use `-f/--filetime` to specify one file's last
+modification time at which to recreate the target tree of files.
+
+Note that this utility does not recreate empty directory hierarchies.
+All empty directories in the target tree are deleted.
 
 ```
 usage: b2restore [-h] [-t TIME] [-f FILETIME] indir outdir

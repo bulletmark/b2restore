@@ -58,8 +58,12 @@ def parsedir(dirpath, func):
         else:
             func(f)
 
-def copyfile(fp, infile, outfile):
+# Keep valid file list
+validfiles = set()
+
+def addfile(fp, infile, outfile):
     'Copy infile to outfile if changed'
+    validfiles.add(fp.name)
     if outfile.exists():
         if filecmp.cmp(infile, outfile):
             return
@@ -73,11 +77,10 @@ def copyfile(fp, infile, outfile):
     print('{} {}: {}'.format(action, date, fp.name))
     os.link(infile, outfile)
 
-valid = set()
 def delfile(path):
     'Delete given file if not needed anymore'
     ipath = path.relative_to(outdir)
-    if str(ipath) not in valid:
+    if str(ipath) not in validfiles:
         date = time.strftime(TIMEFMT, time.localtime(path.stat().st_mtime))
         print('deleting {}: {}'.format(date, ipath))
         path.unlink()
@@ -125,6 +128,7 @@ def main():
                 break
             ix += 1
 
+        # Candidate files may all be newer than specified
         if ix == 0:
             continue
 
@@ -132,11 +136,8 @@ def main():
 
         # If the latest version had a version string then this file must
         # have been deleted at this time
-        if i != ix and fp.version:
-            continue
-
-        valid.add(fp.name)
-        copyfile(fp, indir / fp.path, outdir / fname.name)
+        if i == ix or not fp.version:
+            addfile(fp, indir / fp.path, outdir / fname.name)
 
     # Delete any leftover files
     parsedir(outdir, delfile)

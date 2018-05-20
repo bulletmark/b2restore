@@ -1,8 +1,8 @@
 ## B2RESTORE
 
-[b2restore](http://github.com/bulletmark/b2restore) is a
-command line utility which you can use to manually restore a Backblaze
-B2 archive for a given date+time.
+[b2restore](http://github.com/bulletmark/b2restore) is a command line
+utility which you can use to manually restore a [Backblaze
+B2](https://www.backblaze.com/b2/) archive for a given date and time.
 
 ### INSTALLATION
 
@@ -21,7 +21,7 @@ $ sudo make install
 
 ### USAGE
 
-Simply clone or copy the B2 bucket or sub paths from the bucket which
+Simply clone or copy the B2 bucket or sub-paths from the bucket which
 you want to restore. You **MUST** specify `--b2-versions` to include
 all file versions,
 e.g:
@@ -31,10 +31,12 @@ mkdir b2files
 rclone sync --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files
 ```
 
-Then run this utility to create a snapshot of the directory tree for the
-file versions you are interested in.
+The above command will copy all files and available versions to the
+`b2files` directory. You only need to do this once. Then run this
+utility to create a snapshot of the directory tree for the time you are
+interested in.
 
-E.g. to recreate the tree of latest files:
+E.g. to recreate the tree of latest files, in `outdir`:
 
 ```
 b2restore b2files outdir
@@ -48,11 +50,15 @@ b2restore -t 2018-01-01T09:10:00 b2files outdir
 
 Just keep selecting different times to incrementally recreate `outdir`.
 The utility prints a line for each file updated, created, or deleted in
-`outdir` compared to the previous contents. The date+time of each
-updated/created/deleted file is also listed.
+`outdir` compared to the previous contents. The date and time of each
+updated/created/deleted file is also listed. The target files are all
+hard-linked from the files in the source directory so the `outdir` tree
+is created very quickly since files do not need to be actually copied.
+Thus you can conveniently experiment with the time string to quickly see
+file differences.
 
 Rather than specifying an explicit time string using `-t/--time`, you
-can instead choose to use `-f/--filetime` to specify one file's last
+can instead choose to use `-f/--filetime` to specify any one file's last
 modification time at which to recreate the target tree of files.
 
 Note that this utility does not recreate empty directory hierarchies.
@@ -61,7 +67,7 @@ All empty directories in the target tree are deleted.
 ```
 usage: b2restore [-h] [-t TIME] [-f FILETIME] indir outdir
 
-Program to recreate Backblaze B2 file archive at specified date+time.
+Program to recreate Backblaze B2 file archive at specified date and time.
 
 positional arguments:
   indir                 input B2 archive containing all file versions (from

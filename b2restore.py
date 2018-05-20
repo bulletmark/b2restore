@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-'Program to recreate Backblaze B2 file archive at specified date+time.'
+'Program to recreate Backblaze B2 file archive at specified date and time.'
 # Author: Mark Blakeney, May 2018.
 
 import sys, os, argparse, re, filecmp, time

@@ -12,7 +12,7 @@ readme = here.joinpath('README.md').read_text()
 
 setup(
     name=name,
-    version='1.4',
+    version='1.5',
     description='Program to recreate Backblaze B2 file archive at'
             'specified date+time',
     long_description=readme,

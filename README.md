@@ -21,10 +21,10 @@ $ sudo make install
 
 ### USAGE
 
-Simply clone or copy the B2 bucket or sub-paths from the bucket which
-you want to restore. You **MUST** specify `--b2-versions` to include
-all file versions,
-e.g:
+This utilty is typically used with [Rclone](https://rclone.org/).
+Simply `rclone sync` or `rclone copy` the B2 bucket or sub-paths from
+the bucket which you want to restore. You **MUST** specify
+`--b2-versions` to include all file versions, e.g:
 
 ```
 mkdir b2files

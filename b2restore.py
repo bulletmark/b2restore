@@ -4,8 +4,9 @@
 
 import sys, os, argparse, re, filecmp, time
 from pathlib import Path
-from bisect import bisect_left
+from bisect import bisect
 
+# Format of input and output datetimes
 TIMEFMT = '%Y-%m-%dT%H:%M.%S'
 
 indir = None
@@ -23,7 +24,16 @@ class FileName():
 
     def add(self, path):
         'Insert the versioned file into list of sorted times'
-        ix = bisect_left(self.times, path.time)
+        ix = bisect(self.times, path.time)
+        if ix > 0:
+            opath = self.paths[ix - 1]
+            # If this file looks to be the same as another then prefer
+            # the non-versioned file
+            if opath.time == path.time:
+                if opath.version and not path.version:
+                    self.paths[ix - 1] = path
+                return
+
         self.times.insert(ix, path.time)
         self.paths.insert(ix, path)
 
@@ -32,12 +42,25 @@ class FileVersion():
     def __init__(self, path, subpath):
         self.path = subpath
         self.time = path.stat().st_mtime
+        self.name = str(subpath)
+        self.version = None
 
-        # Split B2 version file into name + version'
-        pathstr = str(subpath)
-        match = re.search(r'^(.+)-(v20\d{2}-\d{2}-\d{2}-\d{6}-\d{3})$', pathstr)
-        self.name, self.version = \
-                (match.group(1), match.group(2)) if match else (pathstr, None)
+        # Find B2 version string in file name. I will admit I don't
+        # understand the logic of where they embed the version string so
+        # this is crude.
+        match = re.search(r'^(.+)-v(20\d{2}-\d{2}-\d{2}-\d{6})-000(.*)$',
+                self.name)
+        if not match:
+            return
+
+        # Ensure we did actually find a valid datetime string
+        try:
+            fver = time.strptime(match.group(2), '%Y-%m-%d-%H%M%S')
+        except ValueError:
+            return
+
+        self.name = match.group(1) + match.group(3)
+        self.version = time.mktime(fver)
 
 def parsefile(path):
     'Parse given file'

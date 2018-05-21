@@ -1,0 +1,43 @@
+#!/bin/bash
+# Can be used to make a dummy B2 repo for testing, e.g.
+# rclone lsl --b2-versions B2:mybucket | ./make-dummy-files -d outdir
+# M.Blakeney, May 2018.
+
+usage() {
+    echo "Usage: $(basename $0) [-options] [host]"
+    echo "Options"
+    echo "-d <outdir> default = current dir"
+    echo "-s (also set file to actual size)"
+    exit 1
+}
+
+OUTDIR=""
+SETSIZE=0
+while getopts d:s c; do
+    case $c in
+    d) OUTDIR=$OPTARG;;
+    s) SETSIZE=1;;
+    \?) usage;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $# -ne 0 ]]; then
+    usage
+fi
+
+if [[ -n $OUTDIR ]]; then
+    OUTDIR=$OUTDIR/
+fi
+
+while read size date time file; do
+    mkdir -p "$OUTDIR""$(dirname $file)"
+    if [[ $SETSIZE -ne 0 ]]; then
+	echo "creating ($size bytes):" "$OUTDIR""$file"
+	fallocate -l $size "$OUTDIR""$file"
+    else
+	echo creating: "$OUTDIR""$file"
+    fi
+    touch -d "${date}T${time}" "$OUTDIR""$file"
+done

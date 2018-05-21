@@ -15,6 +15,7 @@
 DOC = README.md
 
 NAME = b2restore
+SCRIPT = make-dummy-files
 DOCOUT = $(DOC:.md=.html)
 
 all:
@@ -39,6 +40,7 @@ doc:	$(DOCOUT)
 
 check:
 	flake8 $(NAME).py $(NAME) setup.py
+	shellcheck $(SCRIPT)
 
 $(DOCOUT): $(DOC)
 	markdown $< >$@

@@ -1,22 +1,27 @@
 #!/bin/bash
 # Can be used to make a dummy B2 repo for testing, e.g.
-# rclone lsl --b2-versions B2:mybucket | ./make-dummy-files -d outdir
+# rclone lsl --b2-versions B2:mybucket | b2restore-create-dummy-files -d outdir
 # M.Blakeney, May 2018.
 
 usage() {
-    echo "Usage: $(basename $0) [-options] [host]"
-    echo "Options"
+    echo "Usage: $(basename $0) [-options]"
+    echo "Reads B2 file list (from lsl output) from standard input to create"
+    echo "dummy tree of files."
+    echo "Options:"
     echo "-d <outdir> default = current dir"
-    echo "-s (also set file to actual size)"
+    echo "-z (zero fill files, not with random content which is default)"
+    echo "-s (set files to zero length, not their actual size)"
     exit 1
 }
 
 OUTDIR=""
-SETSIZE=0
-while getopts d:s c; do
+NOSIZE=0
+ZERO=""
+while getopts d:zs c; do
     case $c in
     d) OUTDIR=$OPTARG;;
-    s) SETSIZE=1;;
+    z) ZERO="-z";;
+    s) NOSIZE=1;;
     \?) usage;;
     esac
 done
@@ -33,9 +38,9 @@ fi
 
 while read size date time file; do
     mkdir -p "$OUTDIR""$(dirname $file)"
-    if [[ $SETSIZE -ne 0 ]]; then
+    if [[ $NOSIZE -eq 0 ]]; then
 	echo "creating ($size bytes):" "$OUTDIR""$file"
-	fallocate -l $size "$OUTDIR""$file"
+	fallocate $ZERO -l $size "$OUTDIR""$file"
     else
 	echo creating: "$OUTDIR""$file"
     fi

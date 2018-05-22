@@ -15,7 +15,7 @@
 DOC = README.md
 
 NAME = b2restore
-SCRIPT = make-dummy-files
+SCRIPT = b2restore-create-dummy-files
 DOCOUT = $(DOC:.md=.html)
 
 all:

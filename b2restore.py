@@ -114,9 +114,10 @@ def main():
 
     # Process command line options
     opt = argparse.ArgumentParser(description=__doc__.strip())
-    opt.add_argument('-t', '--time',
+    grp = opt.add_mutually_exclusive_group()
+    grp.add_argument('-t', '--time',
             help='set time YYYY-MM-DDTHH:MM.SS, default=latest')
-    opt.add_argument('-f', '--filetime',
+    grp.add_argument('-f', '--filetime',
             help='set time based on specified file')
     opt.add_argument('indir',
             help='input B2 archive containing all file versions '

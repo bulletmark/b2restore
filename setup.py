@@ -2,17 +2,18 @@
 # Setup script to install this package.
 # M.Blakeney, Mar 2018.
 
-import re
+import re, stat
 from pathlib import Path
 from setuptools import setup
 
 here = Path(__file__).resolve().parent
 name = re.sub(r'-.*', '', here.stem)
 readme = here.joinpath('README.md').read_text()
+executable = stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
 
 setup(
     name=name,
-    version='1.6',
+    version='1.7',
     description='Program to recreate Backblaze B2 file archive at'
             'specified date+time',
     long_description=readme,
@@ -30,5 +31,6 @@ setup(
     data_files=[
         (f'share/doc/{name}', ['README.md']),
     ],
-    scripts=[name],
+    scripts=[f.name for f in here.iterdir()
+        if f.is_file() and f.stat().st_mode & executable]
 )

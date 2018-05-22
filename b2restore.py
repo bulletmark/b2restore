@@ -129,6 +129,14 @@ def main():
     indir = Path(args.indir)
     outdir = Path(args.outdir)
 
+    if not indir.is_dir() or (outdir.exists() and not outdir.is_dir()):
+        opt.error('indir and outdir must be directories')
+
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    if indir.stat().st_dev != outdir.stat().st_dev:
+        opt.error('indir and outdir must on same file system')
+
     if args.filetime:
         afile = Path(args.filetime)
         if not afile.exists():
@@ -144,7 +152,6 @@ def main():
     parsedir(indir, parsefile)
 
     # Iterate through all files and restore version for given time
-    outdir.mkdir(parents=True, exist_ok=True)
     for fname in FileName.namemap.values():
         ix = 0
         for i, tm in enumerate(fname.times):

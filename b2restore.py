@@ -64,8 +64,7 @@ class FileVersion():
 
 def parsefile(path):
     'Parse given file'
-    subpath = path.relative_to(indir)
-    fver = FileVersion(path, subpath)
+    fver = FileVersion(path, path.relative_to(indir))
     fname = FileName.namemap.get(fver.name)
     if not fname:
         fname = FileName(fver.name)
@@ -178,8 +177,7 @@ def main():
         for name in dirs:
             dird = Path(root, name)
             if not any(dird.iterdir()) and dird != outdir:
-                subdir = dird.relative_to(outdir)
-                print('deleting empty {}'.format(subdir))
+                print('deleting empty {}'.format(dird.relative_to(outdir)))
                 dird.rmdir()
 
 if __name__ == '__main__':

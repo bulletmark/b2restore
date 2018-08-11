@@ -38,11 +38,12 @@ fi
 
 while read size date time file; do
     mkdir -p "$OUTDIR""$(dirname $file)"
+    OUTFILE="$OUTDIR""$file"
     if [[ $NOSIZE -eq 0 ]]; then
-	echo "creating ($size bytes):" "$OUTDIR""$file"
-	fallocate $ZERO -l $size "$OUTDIR""$file"
+	echo "creating ($size bytes):" "$OUTFILE"
+	fallocate $ZERO -l $size "$OUTFILE"
     else
-	echo creating: "$OUTDIR""$file"
+	echo creating: "$OUTFILE"
     fi
-    touch -d "${date}T${time}" "$OUTDIR""$file"
+    touch -d "${date}T${time}" "$OUTFILE"
 done

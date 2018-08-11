@@ -17,7 +17,6 @@ b2restore` or:
 ```
 $ git clone http://github.com/bulletmark/b2restore
 $ sudo make install
-
 ```
 
 ### USAGE

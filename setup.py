@@ -13,12 +13,12 @@ executable = stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
 
 setup(
     name=name,
-    version='1.8',
+    version='1.8.1',
     description='Program to recreate Backblaze B2 file archive at'
             'specified date+time',
     long_description=readme,
-    long_description_content_type="text/markdown",
-    url=f'https://github.com/bulletmark/{name}',
+    long_description_content_type='text/markdown',
+    url='https://github.com/bulletmark/{}'.format(name),
     author='Mark Blakeney',
     author_email='mark@irsaere.net',
     keywords='backblaze b2',
@@ -29,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3',
     ],
     data_files=[
-        (f'share/doc/{name}', ['README.md']),
+        ('share/doc/{}'.format(name), ['README.md']),
     ],
     scripts=[f.name for f in here.iterdir()
         if f.is_file() and f.stat().st_mode & executable]

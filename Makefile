@@ -25,10 +25,10 @@ install:
 	@python setup.py install --root=$(or $(DESTDIR),/) --optimize=1
 
 uninstall:
-	@rm -vrf /usr/bin/$(NAME)* /etc/$(NAME).conf \
-	    /usr/share/doc/$(NAME) \
-	    /usr/lib/python*/site-packages/*$(NAME)* \
-	    /usr/lib/python*/site-packages/*/*$(NAME)*
+	@rm -vrf $(DESTDIR)/usr/bin/$(NAME)* $(DESTDIR)/etc/$(NAME).conf \
+	    $(DESTDIR)/usr/share/doc/$(NAME) \
+	    $(DESTDIR)/usr/lib/python*/site-packages/*$(NAME)* \
+	    $(DESTDIR)/usr/lib/python*/site-packages/*/*$(NAME)*
 
 sdist:
 	python3 setup.py sdist

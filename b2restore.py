@@ -11,7 +11,7 @@ TIMEFMT = '%Y-%m-%dT%H:%M.%S'
 
 indir = None
 outdir = None
-outgit = False
+exgit = []
 
 class FileName():
     'Class to manage canonical file paths'
@@ -108,7 +108,7 @@ def addfile(fp, infile, outfile):
 def delfile(path):
     'Delete given file if not needed anymore'
     ipath = path.relative_to(outdir)
-    if outgit and ipath.parts[0] == '.git':
+    if ipath.parts[0] in exgit:
         return
     if str(ipath) not in validfiles:
         print('deleting {}: {}'.format(fmttime(path.stat().st_mtime), ipath))
@@ -116,7 +116,7 @@ def delfile(path):
 
 def main():
     'Main code'
-    global indir, outdir, outgit
+    global indir, outdir
 
     # Process command line options
     opt = argparse.ArgumentParser(description=__doc__.strip())
@@ -151,7 +151,8 @@ def main():
             if not outdir.is_dir():
                 opt.error('outdir must be a directory')
 
-            outgit = args.gitkeep and outdir.joinpath('.git').exists()
+            if args.gitkeep:
+                exgit.extend([str(d) for d in outdir.glob('.git*')])
 
         outdir.mkdir(parents=True, exist_ok=True)
 
@@ -207,7 +208,7 @@ def main():
     for root, dirs, files in os.walk(outdir, topdown=False):
         for name in dirs:
             dird = Path(root, name)
-            if not outgit or dird.parts[0] != '.git':
+            if dird.parts[0] not in exgit:
                 if not any(dird.iterdir()) and dird != outdir:
                     print('deleting empty {}'.format(dird.relative_to(outdir)))
                     dird.rmdir()

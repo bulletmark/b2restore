@@ -3,7 +3,8 @@
 [b2restore](http://github.com/bulletmark/b2restore) is a command line
 utility which can be used with [rclone](https://rclone.org/) to
 manually restore a [Backblaze B2](https://www.backblaze.com/b2/) archive
-for any given date and time.
+for any given date and time. Alternatively, you can create a git
+repository of all date and time snapshots.
 
 ### INSTALLATION
 
@@ -19,7 +20,7 @@ $ git clone http://github.com/bulletmark/b2restore
 $ sudo make install
 ```
 
-### USAGE
+### CREATION OF INITIAL RCLONE COPY
 
 This utility is typically used with [rclone](https://rclone.org/).
 Simply `rclone sync` or `rclone copy` the B2 bucket or sub-paths from
@@ -32,9 +33,13 @@ rclone sync --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files
 ```
 
 The above command will copy all files and available versions to the
-`b2files` directory. You only need to do this once. Then run this
-utility to create a snapshot of the directory tree for the time you are
-interested in.
+`b2files` directory. You only need to do this once.
+
+### CREATION OF SNAPSHOT AT GIVEN TIME
+
+Given the above `rclone` initial copy, you run this utility to
+create a snapshot of the directory tree for the time you are interested
+in.
 
 E.g. to recreate the tree of latest files, in `outdir`:
 
@@ -82,6 +87,26 @@ optional arguments:
   -f FILETIME, --filetime FILETIME
                         set time based on specified file
 ```
+
+### CREATION OF GIT REPOSITORY OF ALL SNAPSHOTS
+
+Rather than run `b2restore` for the given date + times you are
+interested in, you can instead choose to run the provided
+`b2restore-create-git` utility to automatically create a git repository
+of snapshots of files for all the dates + times inherent in the `rclone`
+initial copy.
+
+So after performing the `rclone` initial copy above, run the following
+command to create a complete git repository:
+
+```
+b2restore-create-git b2files outdir
+```
+
+Then `cd outdir` and run `git log` etc to view the history.
+
+The utility `b2restore-create-git` takes no optional command line
+arguments.
 
 ### TEST RUN UTILITY
 

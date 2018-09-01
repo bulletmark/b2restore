@@ -1,0 +1,47 @@
+#!/bin/bash
+# Can be used to make a git repo from a B2 versioned tree copy.
+# M.Blakeney, Sep 2018.
+
+usage() {
+    echo "Usage: $(basename $0) [-options] indir outdir"
+    echo "Options:"
+    exit 1
+}
+
+while getopts \? c; do
+    case $c in
+    \?) usage;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $# -ne 2 ]]; then
+    usage
+fi
+
+INDIR=$(realpath "$1")
+OUTDIR="$2"
+PROGDIR=$(realpath "$(dirname $0)")
+MYPROG=$PROGDIR/b2restore
+
+mkdir -p $OUTDIR
+cd $OUTDIR || exit 1
+
+if  [[ "$(ls -A .)" ]]; then
+    echo "outdir must be empty" >&2
+    exit 1
+fi
+
+# Create git repo then iterate through all times and create a git commit
+# for each time.
+if ! git init .; then
+    exit 1
+fi
+
+$MYPROG -s $INDIR | grep '^  ' | while read t b; do
+    echo "=== Creating tree at $t ==="
+    $MYPROG -g -t $t $INDIR .
+    git add .
+    git commit -m "Snapshot of files at $t" --date="$t"
+done

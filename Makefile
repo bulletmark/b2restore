@@ -15,7 +15,7 @@
 DOC = README.md
 
 NAME = b2restore
-SCRIPT = b2restore-create-dummy-files
+SCRIPTS = b2restore-create-dummy-files b2restore-create-git
 DOCOUT = $(DOC:.md=.html)
 
 all:
@@ -40,7 +40,7 @@ doc:	$(DOCOUT)
 
 check:
 	flake8 $(NAME).py $(NAME) setup.py
-	shellcheck $(SCRIPT)
+	shellcheck $(SCRIPTS)
 
 $(DOCOUT): $(DOC)
 	markdown $< >$@

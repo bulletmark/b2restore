@@ -11,6 +11,7 @@ TIMEFMT = '%Y-%m-%dT%H:%M.%S'
 
 indir = None
 outdir = None
+outgit = False
 
 class FileName():
     'Class to manage canonical file paths'
@@ -40,8 +41,10 @@ class FileName():
 class FileVersion():
     'Class to manage all versioned file paths'
     def __init__(self, path, subpath):
+        stat = path.stat()
         self.path = subpath
-        self.time = path.stat().st_mtime
+        self.time = stat.st_mtime
+        self.size = stat.st_size
         self.name = str(subpath)
         self.version = None
 
@@ -83,6 +86,10 @@ def parsedir(dirpath, func):
 # Keep valid file list
 validfiles = set()
 
+def fmttime(mtime):
+    'Return string rep of given mtime'
+    return time.strftime(TIMEFMT, time.localtime(mtime))
+
 def addfile(fp, infile, outfile):
     'Copy infile to outfile if changed'
     validfiles.add(fp.name)
@@ -95,21 +102,21 @@ def addfile(fp, infile, outfile):
         action = 'creating'
         outfile.parent.mkdir(parents=True, exist_ok=True)
 
-    date = time.strftime(TIMEFMT, time.localtime(fp.time))
-    print('{} {}: {}'.format(action, date, fp.name))
+    print('{} {}: {}'.format(action, fmttime(fp.time), fp.name))
     os.link(infile, outfile)
 
 def delfile(path):
     'Delete given file if not needed anymore'
     ipath = path.relative_to(outdir)
+    if outgit and ipath.parts[0] == '.git':
+        return
     if str(ipath) not in validfiles:
-        date = time.strftime(TIMEFMT, time.localtime(path.stat().st_mtime))
-        print('deleting {}: {}'.format(date, ipath))
+        print('deleting {}: {}'.format(fmttime(path.stat().st_mtime), ipath))
         path.unlink()
 
 def main():
     'Main code'
-    global indir, outdir
+    global indir, outdir, outgit
 
     # Process command line options
     opt = argparse.ArgumentParser(description=__doc__.strip())
@@ -118,23 +125,38 @@ def main():
             help='set time YYYY-MM-DDTHH:MM.SS, default=latest')
     grp.add_argument('-f', '--filetime',
             help='set time based on specified file')
+    opt.add_argument('-s', '--summary', action='store_true',
+            help='just print a summary of files and versions')
+    opt.add_argument('-g', '--gitkeep', action='store_true',
+            help='preserve any top level git dir in outdir')
     opt.add_argument('indir',
             help='input B2 archive containing all file versions '
             ' (from --b2-versions)')
-    opt.add_argument('outdir',
+    opt.add_argument('outdir', nargs='?',
             help='output directory to recreate for given time')
     args = opt.parse_args()
 
-    indir = Path(args.indir)
-    outdir = Path(args.outdir)
+    indir = Path(args.indir).expanduser()
 
-    if not indir.is_dir() or (outdir.exists() and not outdir.is_dir()):
-        opt.error('indir and outdir must be directories')
+    if not indir.is_dir():
+        opt.error('indir must be a directory')
 
-    outdir.mkdir(parents=True, exist_ok=True)
+    if not args.summary:
+        if not args.outdir:
+            opt.error('outdir must be specified')
 
-    if indir.stat().st_dev != outdir.stat().st_dev:
-        opt.error('indir and outdir must on same file system')
+        outdir = Path(args.outdir).expanduser()
+
+        if outdir.exists():
+            if not outdir.is_dir():
+                opt.error('outdir must be a directory')
+
+            outgit = args.gitkeep and outdir.joinpath('.git').exists()
+
+        outdir.mkdir(parents=True, exist_ok=True)
+
+        if indir.stat().st_dev != outdir.stat().st_dev:
+            opt.error('indir and outdir must on same file system')
 
     if args.filetime:
         afile = Path(args.filetime)
@@ -150,9 +172,18 @@ def main():
     # Parse all files in the versioned indir
     parsedir(indir, parsefile)
 
+    if args.summary:
+        fnames = sorted(FileName.namemap)
+        for fname in fnames:
+            print('{}:'.format(fname))
+            for fpath in FileName.namemap[fname].paths:
+                print('  {} {:8} B'.format(fmttime(fpath.time), fpath.size))
+        return
+
     # Iterate through all files and restore version for given time
     for fname in FileName.namemap.values():
         ix = 0
+
         for i, tm in enumerate(fname.times):
             if argstime and tm > argstime:
                 break
@@ -176,9 +207,10 @@ def main():
     for root, dirs, files in os.walk(outdir, topdown=False):
         for name in dirs:
             dird = Path(root, name)
-            if not any(dird.iterdir()) and dird != outdir:
-                print('deleting empty {}'.format(dird.relative_to(outdir)))
-                dird.rmdir()
+            if not outgit or dird.parts[0] != '.git':
+                if not any(dird.iterdir()) and dird != outdir:
+                    print('deleting empty {}'.format(dird.relative_to(outdir)))
+                    dird.rmdir()
 
 if __name__ == '__main__':
     sys.exit(main())

@@ -105,8 +105,15 @@ b2restore-create-git b2files outdir
 
 Then `cd outdir` and run `git log` etc to view the history.
 
-The utility `b2restore-create-git` takes no optional command line
-arguments.
+#### B2RESTORE-CREATE-GIT COMMAND LINE OPTIONS
+
+```
+Usage: b2restore-create-git [-options] indir outdir
+Create git repository from given B2 rclone copy.
+Options:
+-t YYYY-MM-DDTHH:MM.SS (start git repo from given time)
+```
+
 
 ### TEST RUN UTILITY
 

@@ -167,6 +167,10 @@ def main():
         argstime = afile.stat().st_mtime
     elif args.time:
         argstime = time.mktime(time.strptime(args.time, TIMEFMT))
+
+        # Add a large fraction to ensure we match again file times which
+        # include msecs.
+        argstime += 1 - time.clock_getres(time.CLOCK_MONOTONIC)
     else:
         argstime = None
 

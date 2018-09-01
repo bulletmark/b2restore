@@ -4,12 +4,16 @@
 
 usage() {
     echo "Usage: $(basename $0) [-options] indir outdir"
+    echo "Create git repository from given B2 rclone copy."
     echo "Options:"
+    echo "-t YYYY-MM-DDTHH:MM.SS (start git repo from given time)"
     exit 1
 }
 
-while getopts \? c; do
+STRTTIME=""
+while getopts t: c; do
     case $c in
+    t) STRTTIME=$OPTARG;;
     \?) usage;;
     esac
 done
@@ -25,8 +29,8 @@ OUTDIR="$2"
 PROGDIR=$(realpath "$(dirname $0)")
 MYPROG=$PROGDIR/b2restore
 
-mkdir -p $OUTDIR
-cd $OUTDIR || exit 1
+mkdir -p "$OUTDIR"
+cd "$OUTDIR" || exit 1
 
 if  [[ "$(ls -A .)" ]]; then
     echo "outdir must be empty" >&2
@@ -39,9 +43,12 @@ if ! git init .; then
     exit 1
 fi
 
-$MYPROG -s $INDIR | grep '^  ' | while read t b; do
+$MYPROG -s "$INDIR" | sed -n '/^ \+/s/^ *//p' | sort -u | while read t b; do
+    if [[ -n "$STRTTIME" && "$t" < "$STRTTIME" ]]; then
+	continue
+    fi
     echo "=== Creating tree at $t ==="
-    $MYPROG -g -t $t $INDIR .
+    $MYPROG -g -t "$t" "$INDIR" .
     git add .
     git commit -m "Snapshot of files at $t" --date="$t"
 done

@@ -4,41 +4,46 @@
 # M.Blakeney, May 2018.
 
 usage() {
-    echo "Usage: $(basename $0) [-options]"
+    echo "Usage: $(basename $0) [-options] outdir"
     echo "Reads B2 file list (from lsl output) from standard input to create"
     echo "dummy tree of files."
     echo "Options:"
-    echo "-d <outdir> default = current dir"
     echo "-z (zero fill files, not with random content which is default)"
     echo "-s (set files to zero length, not their actual size)"
+    echo "-p (only process files under given path)"
     exit 1
 }
 
-OUTDIR=""
 NOSIZE=0
 ZERO=""
-while getopts d:zs c; do
+SUBPATH=""
+while getopts zsp: c; do
     case $c in
-    d) OUTDIR=$OPTARG;;
     z) ZERO="-z";;
     s) NOSIZE=1;;
+    p) SUBPATH=$OPTARG;;
     \?) usage;;
     esac
 done
 
 shift $((OPTIND - 1))
 
-if [[ $# -ne 0 ]]; then
+if [[ $# -ne 1 ]]; then
     usage
 fi
 
-if [[ -n $OUTDIR ]]; then
-    OUTDIR=$OUTDIR/
-fi
+OUTDIR=${1%/}
 
 while read size date time file; do
-    mkdir -p "$OUTDIR""$(dirname $file)"
-    OUTFILE="$OUTDIR""$file"
+    # Filter out all but required paths if specified ..
+    if [[ -n $SUBPATH ]]; then
+	if ! echo $file | grep -q "^$SUBPATH"; then
+	    continue
+	fi
+    fi
+
+    mkdir -p "$OUTDIR"/"$(dirname $file)"
+    OUTFILE="$OUTDIR"/"$file"
     if [[ $NOSIZE -eq 0 ]]; then
 	echo "creating ($size bytes):" "$OUTFILE"
 	fallocate $ZERO -l $size "$OUTFILE"

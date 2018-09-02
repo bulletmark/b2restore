@@ -72,7 +72,8 @@ All empty directories in the target tree are deleted.
 #### B2RESTORE COMMAND LINE OPTIONS
 
 ```
-usage: b2restore [-h] [-t TIME | -f FILETIME] indir outdir
+usage: b2restore [-h] [-t TIME | -f FILETIME] [-s] [-g] [-p PATH]
+                 indir [outdir]
 
 Program to recreate Backblaze B2 file archive at specified date and time.
 
@@ -86,6 +87,9 @@ optional arguments:
   -t TIME, --time TIME  set time YYYY-MM-DDTHH:MM.SS, default=latest
   -f FILETIME, --filetime FILETIME
                         set time based on specified file
+  -s, --summary         just print a summary of files and versions
+  -g, --gitkeep         preserve any top level git dir in outdir
+  -p PATH, --path PATH  only process files under given path
 ```
 
 ### CREATION OF GIT REPOSITORY OF ALL SNAPSHOTS
@@ -112,8 +116,9 @@ Usage: b2restore-create-git [-options] indir outdir
 Create git repository from given B2 rclone copy.
 Options:
 -t YYYY-MM-DDTHH:MM.SS (start git repo from given time)
+-e YYYY-MM-DDTHH:MM.SS (end git repo before given time)
+-p (only process files under given path)
 ```
-
 
 ### TEST RUN UTILITY
 
@@ -136,7 +141,7 @@ an onerous huge download of your entire B2 archive.
 Here is an example usage:
 
 ```
-rclone lsl --b2-versions B2:mybucket | b2restore-create-dummy-files -d allfiles
+rclone lsl --b2-versions B2:mybucket | b2restore-create-dummy-files allfiles
 b2restore allfiles b2
 du -shl b2 # (see how much storage tree of latest versions uses)
 b2restore -t 2018-05-10T12:00.00 allfiles b2
@@ -146,13 +151,13 @@ du -shl b2 # (see how much storage tree of yesterdays versions uses)
 #### B2RESTORE-CREATE-DUMMY-FILES COMMAND LINE OPTIONS
 
 ```
-Usage: b2restore-create-dummy-files [-options]
+Usage: b2restore-create-dummy-files [-options] outdir
 Reads B2 file list (from lsl output) from standard input to create
 dummy tree of files.
 Options:
--d <outdir> default = current dir
 -z (zero fill files, not with random content which is default)
 -s (set files to zero length, not their actual size)
+-p (only process files under given path)
 ```
 
 ### LICENSE

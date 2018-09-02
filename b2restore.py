@@ -65,9 +65,13 @@ class FileVersion():
         self.name = match.group(1) + match.group(3)
         self.version = time.mktime(fver)
 
-def parsefile(path):
+def parsefile(args, path):
     'Parse given file'
-    fver = FileVersion(path, path.relative_to(indir))
+    subpath = path.relative_to(indir)
+    if args.path and not str(subpath).startswith(args.path):
+        return
+
+    fver = FileVersion(path, subpath)
     fname = FileName.namemap.get(fver.name)
     if not fname:
         fname = FileName(fver.name)
@@ -75,13 +79,13 @@ def parsefile(path):
     # Add this file instance into the list of versions
     fname.add(fver)
 
-def parsedir(dirpath, func):
+def parsedir(args, dirpath, func):
     'Parse given dir and apply func() to files found'
     for f in dirpath.iterdir():
         if f.is_dir():
-            parsedir(f, func)
+            parsedir(args, f, func)
         else:
-            func(f)
+            func(args, f)
 
 # Keep valid file list
 validfiles = set()
@@ -105,7 +109,7 @@ def addfile(fp, infile, outfile):
     print('{} {}: {}'.format(action, fmttime(fp.time), fp.name))
     os.link(infile, outfile)
 
-def delfile(path):
+def delfile(args, path):
     'Delete given file if not needed anymore'
     ipath = path.relative_to(outdir)
     if ipath.parts[0] in exgit:
@@ -129,6 +133,8 @@ def main():
             help='just print a summary of files and versions')
     opt.add_argument('-g', '--gitkeep', action='store_true',
             help='preserve any top level git dir in outdir')
+    opt.add_argument('-p', '--path',
+            help='only process files under given path')
     opt.add_argument('indir',
             help='input B2 archive containing all file versions '
             ' (from --b2-versions)')
@@ -175,7 +181,7 @@ def main():
         argstime = None
 
     # Parse all files in the versioned indir
-    parsedir(indir, parsefile)
+    parsedir(args, indir, parsefile)
 
     if args.summary:
         fnames = sorted(FileName.namemap)
@@ -206,7 +212,7 @@ def main():
             addfile(fp, indir / fp.path, outdir / fname.name)
 
     # Delete any leftover files
-    parsedir(outdir, delfile)
+    parsedir(args, outdir, delfile)
 
     # Delete all leftover empty dirs
     for root, dirs, files in os.walk(outdir, topdown=False):

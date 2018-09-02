@@ -7,13 +7,19 @@ usage() {
     echo "Create git repository from given B2 rclone copy."
     echo "Options:"
     echo "-t YYYY-MM-DDTHH:MM.SS (start git repo from given time)"
+    echo "-e YYYY-MM-DDTHH:MM.SS (end git repo before given time)"
+    echo "-p (only process files under given path)"
     exit 1
 }
 
 STRTTIME=""
-while getopts t: c; do
+ENDTIME=""
+SUBPATH=""
+while getopts t:e:p: c; do
     case $c in
     t) STRTTIME=$OPTARG;;
+    e) ENDTIME=$OPTARG;;
+    p) SUBPATH="-p $OPTARG";;
     \?) usage;;
     esac
 done
@@ -43,12 +49,15 @@ if ! git init .; then
     exit 1
 fi
 
-$MYPROG -s "$INDIR" | sed -n '/^ \+/s/^ *//p' | sort -u | while read t b; do
+$MYPROG $SUBPATH -s "$INDIR" | sed -n '/^ \+/s/^ *//p' | sort -u | while read t b; do
     if [[ -n "$STRTTIME" && "$t" < "$STRTTIME" ]]; then
 	continue
     fi
+    if [[ -n "$ENDTIME" && ! "$t" < "$ENDTIME" ]]; then
+	break
+    fi
     echo "=== Creating tree at $t ==="
-    $MYPROG -g -t "$t" "$INDIR" .
+    $MYPROG $SUBPATH -g -t "$t" "$INDIR" .
     git add .
     git commit -m "Snapshot of files at $t" --date="$t"
 done

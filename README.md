@@ -66,6 +66,11 @@ Rather than specifying an explicit time string using `-t/--time`, you
 can instead choose to use `-f/--filetime` to specify any one specific
 file's modification time at which to recreate the target tree of files.
 
+You may wish to manually `git commit` each snapshot you create in the
+outdir tree between your manually time-selected runs. If so, you will
+need to add the `-g` switch to prevent `b2restore` from deleting your
+top level `.git/` repo on each run.
+
 Note that this utility does not recreate empty directory hierarchies.
 All empty directories in the target tree are deleted.
 

@@ -12,6 +12,7 @@ TIMEFMT = '%Y-%m-%dT%H:%M.%S'
 indir = None
 outdir = None
 exgit = []
+args = None
 
 class FileName():
     'Class to manage canonical file paths'
@@ -65,7 +66,7 @@ class FileVersion():
         self.name = match.group(1) + match.group(3)
         self.version = time.mktime(fver)
 
-def parsefile(args, path):
+def parsefile(path):
     'Parse given file'
     subpath = path.relative_to(indir)
     if args.path and not str(subpath).startswith(args.path):
@@ -79,13 +80,13 @@ def parsefile(args, path):
     # Add this file instance into the list of versions
     fname.add(fver)
 
-def parsedir(args, dirpath, func):
+def parsedir(dirpath, func):
     'Parse given dir and apply func() to files found'
     for f in dirpath.iterdir():
         if f.is_dir():
-            parsedir(args, f, func)
+            parsedir(f, func)
         else:
-            func(args, f)
+            func(f)
 
 # Keep valid file list
 validfiles = set()
@@ -109,7 +110,7 @@ def addfile(fp, infile, outfile):
     print('{} {}: {}'.format(action, fmttime(fp.time), fp.name))
     os.link(infile, outfile)
 
-def delfile(args, path):
+def delfile(path):
     'Delete given file if not needed anymore'
     ipath = path.relative_to(outdir)
     if ipath.parts[0] in exgit:
@@ -120,7 +121,7 @@ def delfile(args, path):
 
 def main():
     'Main code'
-    global indir, outdir
+    global indir, outdir, args
 
     # Process command line options
     opt = argparse.ArgumentParser(description=__doc__.strip())
@@ -181,7 +182,7 @@ def main():
         argstime = None
 
     # Parse all files in the versioned indir
-    parsedir(args, indir, parsefile)
+    parsedir(indir, parsefile)
 
     if args.summary:
         fnames = sorted(FileName.namemap)
@@ -212,7 +213,7 @@ def main():
             addfile(fp, indir / fp.path, outdir / fname.name)
 
     # Delete any leftover files
-    parsedir(args, outdir, delfile)
+    parsedir(outdir, delfile)
 
     # Delete all leftover empty dirs
     for root, dirs, files in os.walk(outdir, topdown=False):

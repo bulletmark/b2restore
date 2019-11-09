@@ -22,13 +22,10 @@ all:
 	@echo "Type sudo make install|uninstall, or make doc|check|clean"
 
 install:
-	@python setup.py install --root=$(or $(DESTDIR),/) --optimize=1
+	@./install.sh -d "$(DESTDIR)"
 
 uninstall:
-	@rm -vrf $(DESTDIR)/usr/bin/$(NAME)* $(DESTDIR)/etc/$(NAME).conf \
-	    $(DESTDIR)/usr/share/doc/$(NAME) \
-	    $(DESTDIR)/usr/lib/python*/site-packages/*$(NAME)* \
-	    $(DESTDIR)/usr/lib/python*/site-packages/*/*$(NAME)*
+	@./install.sh -d "$(DESTDIR)" -u $(NAME)
 
 sdist:
 	python3 setup.py sdist
@@ -40,6 +37,7 @@ doc:	$(DOCOUT)
 
 check:
 	flake8 $(NAME).py $(NAME) setup.py
+	vermin -i -q $(NAME).py $(NAME) setup.py
 	shellcheck $(SCRIPTS)
 
 $(DOCOUT): $(DOC)

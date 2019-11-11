@@ -12,12 +12,13 @@ Arch users can install [b2restore from the
 AUR](https://aur.archlinux.org/packages/b2restore/).
 
 Requires python 3.5 or later. Note [b2restore is on
-PyPI](https://pypi.org/project/b2restore/) so you can `sudo pip install
+PyPI](https://pypi.org/project/b2restore/) so you can `sudo pip3 install
 b2restore` or:
 
 ```
 $ git clone http://github.com/bulletmark/b2restore
-$ sudo make install
+$ cd b2restore
+$ sudo pip3 install .
 ```
 
 ### CREATION OF INITIAL RCLONE COPY

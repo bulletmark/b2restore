@@ -29,12 +29,11 @@ the bucket which you want to restore. You **MUST** specify
 `--b2-versions` to include all file versions, e.g:
 
 ```
-mkdir b2files
 rclone sync --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files
 ```
 
 The above command will copy all files and available versions to the
-`b2files` directory. You only need to do this once.
+created `b2files` directory. You only need to do this once.
 
 ### CREATION OF SNAPSHOT AT GIVEN TIME
 
@@ -147,11 +146,11 @@ an onerous huge download of your entire B2 archive.
 Here is an example usage:
 
 ```
-rclone lsl --b2-versions B2:mybucket | b2restore-create-dummy-files allfiles
-b2restore allfiles b2
-du -shl b2 # (see how much storage tree of latest versions uses)
-b2restore -t 2018-05-10T12:00.00 allfiles b2
-du -shl b2 # (see how much storage tree of yesterdays versions uses)
+rclone lsl --b2-versions B2:mybucket | b2restore-create-dummy-files b2files
+b2restore b2files outdir
+du -shl outdir # (see how much storage tree of latest versions uses)
+b2restore -t 2018-05-10T12:00.00 b2files outdir
+du -shl outdir # (see how much storage tree of yesterdays versions uses)
 ```
 
 #### B2RESTORE-CREATE-DUMMY-FILES COMMAND LINE OPTIONS

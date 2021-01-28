@@ -12,7 +12,7 @@
 # General Public License at <http://www.gnu.org/licenses/> for more
 # details.
 
-NAME = b2restore
+NAME = $(shell basename $(CURDIR))
 SCRIPTS = $(NAME)-create-dummy-files $(NAME)-create-git
 
 DOC = README.md
@@ -29,10 +29,11 @@ uninstall:
 	pip3 uninstall $(NAME)
 
 sdist:
-	python3 setup.py sdist
+	rm -rf dist
+	python3 setup.py sdist bdist_wheel
 
 upload: sdist
-	twine3 upload dist/*
+	twine3 upload --skip-existing dist/*
 
 doc:	$(DOCOUT)
 
@@ -40,9 +41,10 @@ $(DOCOUT): $(DOC)
 	markdown $< >$@
 
 check:
-	flake8 $(NAME).py $(NAME) setup.py
-	vermin -i -q --no-tips $(NAME).py $(NAME) setup.py
 	shellcheck $(SCRIPTS)
+	flake8 $(NAME).py setup.py
+	vermin -i -q --no-tips $(NAME).py setup.py
+	python3 setup.py check
 
 clean:
 	@rm -vrf $(DOCOUT) *.egg-info build/ dist/ __pycache__/

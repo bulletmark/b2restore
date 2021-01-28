@@ -11,9 +11,16 @@ repository of all date and time snapshots.
 Arch users can install [b2restore from the
 AUR](https://aur.archlinux.org/packages/b2restore/).
 
-Requires python 3.5 or later. Note [b2restore is on
-PyPI](https://pypi.org/project/b2restore/) so you can `sudo pip3 install
-b2restore` or:
+Python 3.5 or later is required. Note [b2restore is on
+PyPI](https://pypi.org/project/b2restore/) so just ensure that
+`python3-pip` and `python3-wheel` are installed then type the following
+to install (or upgrade):
+
+```
+$ sudo pip3 install -U b2restore
+```
+
+Or, to install from this source repository:
 
 ```
 $ git clone http://github.com/bulletmark/b2restore

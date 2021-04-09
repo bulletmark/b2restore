@@ -14,7 +14,7 @@ outdir = None
 exgit = []
 args = None
 
-class FileName():
+class FileName:
     'Class to manage canonical file paths'
     namemap = {}
 
@@ -39,7 +39,7 @@ class FileName():
         self.times.insert(ix, path.time)
         self.paths.insert(ix, path)
 
-class FileVersion():
+class FileVersion:
     'Class to manage all versioned file paths'
     def __init__(self, path, subpath):
         stat = path.stat()

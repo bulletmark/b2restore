@@ -4,14 +4,15 @@
 utility which can be used with [rclone](https://rclone.org/) to
 manually restore a [Backblaze B2](https://www.backblaze.com/b2/) archive
 for any given date and time. Alternatively, you can create a git
-repository of all date and time snapshots.
+repository of all date and time snapshots (subject to the
+[limitations](#limitations) described below).
 
 ### INSTALLATION
 
 Arch users can install [b2restore from the
 AUR](https://aur.archlinux.org/packages/b2restore/).
 
-Python 3.5 or later is required. Note [b2restore is on
+Python 3.6 or later is required. Note [b2restore is on
 PyPI](https://pypi.org/project/b2restore/) so just ensure that
 `python3-pip` and `python3-wheel` are installed then type the following
 to install (or upgrade):
@@ -80,6 +81,35 @@ top level `.git/` repo on each run.
 
 Note that this utility does not recreate empty directory hierarchies.
 All empty directories in the target tree are deleted.
+
+### LIMITATIONS
+
+If you want to restore a snapshot of your files for a specific
+date/time, then unfortunately the metadata returned by
+[rclone](https://rclone.org/) from [Backblaze
+B2](https://www.backblaze.com/b2/) is not sufficient to create a
+completely legitimate snapshot. However, all files restored for a
+specific date/time will contain correct contents, the only issue is that
+there may be some files which were actually deleted by that date but
+those files may still be present. An example best illustrates the issue:
+
+Say you run a rclone backup every night at 0000 am to B2:mybucket.
+
+1. On 01-Jan you create a file `a.txt`.
+2. On 02-Jan you delete file `a.txt`.
+3. On 03-Jan you create file `a.txt` again (but with different content to 01-Jan).
+4. On 04-Jan you retrieve the latest archive using `rclone sync
+   --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files`.
+
+If you run `b2restore b2files outdir` then you will get the latest
+03-Jan version of `a.txt` in `outdir`. If you then run `b2restore -t<time>
+b2files outdir` for 01-Jan, then you will get `a.txt` with the correct
+content from 01-Jan. However, if run that command for 02-Jan, then you
+will still see the `a.txt` file and content corresponding to 01-Jan
+(when it actually should be deleted for that day). If you are only using
+b2restore to find and restore one or more files for specific date/times, then
+this is not a serious practical problem. There may be some extra files
+around, but all files are correct for the specified date/time.
 
 #### B2RESTORE COMMAND LINE OPTIONS
 

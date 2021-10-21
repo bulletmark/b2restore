@@ -3,6 +3,7 @@
 # Author: Mark Blakeney, May 2018.
 
 import sys, os, argparse, re, filecmp, time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from bisect import bisect
 
@@ -44,9 +45,9 @@ class FileVersion:
     def __init__(self, path, subpath):
         stat = path.stat()
         self.path = subpath
-        self.time = stat.st_mtime
         self.size = stat.st_size
         self.name = str(subpath)
+        self.time = datetime.fromtimestamp(stat.st_mtime)
         self.version = None
 
         # Find B2 version string in file name. I will admit I don't
@@ -59,12 +60,15 @@ class FileVersion:
 
         # Ensure we did actually find a valid datetime string
         try:
-            fver = time.strptime(match.group(2), '%Y-%m-%d-%H%M%S')
+            fver = datetime.strptime(match.group(2), '%Y-%m-%d-%H%M%S')
         except ValueError:
             return
 
         self.name = match.group(1) + match.group(3)
-        self.version = time.mktime(fver)
+
+        # Timezone is in UTC. Convert to local (naive) time.
+        fver = fver.replace(tzinfo=timezone.utc)
+        self.version = fver.astimezone().replace(tzinfo=None)
 
 def parsefile(path):
     'Parse given file'
@@ -91,9 +95,9 @@ def parsedir(dirpath, func):
 # Keep valid file list
 validfiles = set()
 
-def fmttime(mtime):
-    'Return string rep of given mtime'
-    return time.strftime(TIMEFMT, time.localtime(mtime))
+def fmttime(dtime):
+    'Return string rep of given time'
+    return dtime.strftime(TIMEFMT)
 
 def addfile(fp, infile, outfile):
     'Copy infile to outfile if changed'
@@ -107,7 +111,7 @@ def addfile(fp, infile, outfile):
         action = 'creating'
         outfile.parent.mkdir(parents=True, exist_ok=True)
 
-    print('{} {}: {}'.format(action, fmttime(fp.time), fp.name))
+    print(f'{action} {fmttime(fp.time)}: {fp.name}')
     os.link(infile, outfile)
 
 def delfile(path):
@@ -116,7 +120,8 @@ def delfile(path):
     if ipath.parts[0] in exgit:
         return
     if str(ipath) not in validfiles:
-        print('deleting {}: {}'.format(fmttime(path.stat().st_mtime), ipath))
+        vers = fmttime(datetime.fromtimestamp(path.stat().st_mtime))
+        print(f'deleting {vers}: {ipath}')
         path.unlink()
 
 def main():
@@ -169,15 +174,16 @@ def main():
     if args.filetime:
         afile = Path(args.filetime)
         if not afile.exists():
-            opt.error('{} does not exist'.format(args.filetime))
+            opt.error(f'{args.filetime} does not exist')
 
-        argstime = afile.stat().st_mtime
+        argstime = datetime.fromtimestamp(afile.stat().st_mtime)
     elif args.time:
-        argstime = time.mktime(time.strptime(args.time, TIMEFMT))
+        argstime = datetime.strptime(args.time, TIMEFMT)
 
         # Add a large fraction to ensure we match again file times which
         # include msecs.
-        argstime += 1 - time.clock_getres(time.CLOCK_MONOTONIC)
+        argstime += timedelta(
+                seconds=(1 - time.clock_getres(time.CLOCK_MONOTONIC)))
     else:
         argstime = None
 
@@ -187,29 +193,31 @@ def main():
     if args.summary:
         fnames = sorted(FileName.namemap)
         for fname in fnames:
-            print('{}:'.format(fname))
+            print(f'{fname}:')
             for fpath in FileName.namemap[fname].paths:
-                print('  {} {:8} B'.format(fmttime(fpath.time), fpath.size))
+                vers = fmttime(fpath.version) if fpath.version \
+                        else '----- current -----'
+                print(f'  {fmttime(fpath.time)} {vers} {fpath.size:8} B')
         return
 
     # Iterate through all files and restore version for given time
     for fname in FileName.namemap.values():
-        ix = 0
-
-        for i, tm in enumerate(fname.times):
+        for index, tm in enumerate(fname.times):
             if argstime and tm > argstime:
                 break
-            ix += 1
+        else:
+            index += 1
 
         # Candidate files may all be newer than specified
-        if ix == 0:
+        if index == 0:
             continue
 
-        fp = fname.paths[ix - 1]
+        fp = fname.paths[index - 1]
 
-        # If the latest version had a version string then this file must
+        # If the latest version had a version string then this file may
         # have been deleted at this time
-        if i == ix or not fp.version:
+        if index < len(fname.times) or not fp.version or \
+                (argstime and argstime <= fp.version):
             addfile(fp, indir / fp.path, outdir / fname.name)
 
     # Delete any leftover files
@@ -221,7 +229,7 @@ def main():
             dird = Path(root, name)
             if dird.parts[0] not in exgit:
                 if not any(dird.iterdir()) and dird != outdir:
-                    print('deleting empty {}'.format(dird.relative_to(outdir)))
+                    print(f'deleting empty {dird.relative_to(outdir)}')
                     dird.rmdir()
 
 if __name__ == '__main__':

@@ -58,7 +58,7 @@ b2restore b2files outdir
 E.g. to recreate the tree of files at a specified time:
 
 ```
-b2restore -t 2018-01-01T09:10:00 b2files outdir
+b2restore -t 2018-01-01T09:10.00 b2files outdir
 ```
 
 Just keep selecting different times to incrementally recreate `outdir`

@@ -124,7 +124,7 @@ positional arguments:
                         --b2-versions)
   outdir                output directory to recreate for given time
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -t TIME, --time TIME  set time YYYY-MM-DDTHH:MM.SS, default=latest
   -f FILETIME, --filetime FILETIME

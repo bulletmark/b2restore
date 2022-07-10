@@ -1,4 +1,6 @@
 ## B2RESTORE
+[![PyPi](https://img.shields.io/pypi/v/b2restore)](https://pypi.org/project/b2restore/)
+[![AUR](https://img.shields.io/aur/version/b2restore)](https://aur.archlinux.org/packages/b2restore/)
 
 [b2restore](http://github.com/bulletmark/b2restore) is a command line
 utility which can be used with [rclone](https://rclone.org/) to

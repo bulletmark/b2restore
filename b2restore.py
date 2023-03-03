@@ -58,14 +58,16 @@ class FileVersion:
         # Find B2 version string in file name. I will admit I don't
         # understand the logic of where they embed the version string so
         # this is crude.
-        match = re.search(r'^(.+)-v(20\d{2}-\d{2}-\d{2}-\d{6})-000(.*)$',
+        match = re.search(r'^(.+)-v(20\d{2}-\d{2}-\d{2}-\d{6}-\d{3})(.*)$',
                 self.name)
         if not match:
             return
 
+        timestr = match.group(2) + '000'
+
         # Ensure we did actually find a valid datetime string
         try:
-            fver = datetime.strptime(match.group(2), '%Y-%m-%d-%H%M%S')
+            fver = datetime.strptime(timestr, '%Y-%m-%d-%H%M%S-%f')
         except ValueError:
             return
 

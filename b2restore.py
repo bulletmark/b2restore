@@ -139,7 +139,7 @@ def main():
     opt = argparse.ArgumentParser(description=__doc__.strip())
     grp = opt.add_mutually_exclusive_group()
     grp.add_argument('-t', '--time',
-            help='set time YYYY-MM-DDTHH:MM.SS, default=latest')
+            help='set time YYYY-MM-DD[THH:MM[.SS]], default=latest')
     grp.add_argument('-f', '--filetime',
             help='set time based on specified file')
     opt.add_argument('-s', '--summary', action='store_true',
@@ -185,9 +185,19 @@ def main():
 
         argstime = datetime.fromtimestamp(afile.stat().st_mtime)
     elif args.time:
+        # Allow user to just specify date or just date + hhmm
+
+        if len(args.time) == 10:
+            args.time += 'T23:59.59'
+        elif len(args.time) == 16:
+            args.time += '.59'
+
+        if args.time[10] == ' ':
+            args.time = args.time[:10] + 'T' + args.time[11:]
+
         argstime = datetime.strptime(args.time, TIMEFMT)
 
-        # Add a large fraction to ensure we match again file times which
+        # Add a large fraction to ensure we match against file times which
         # include msecs.
         argstime += timedelta(
                 seconds=(1 - time.clock_getres(time.CLOCK_MONOTONIC)))

@@ -13,7 +13,7 @@ executable = stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
 
 setup(
     name=name,
-    version='1.12',
+    version='1.13',
     description='Program to recreate Backblaze B2 file archive at'
             'specified date+time',
     long_description=here.joinpath('README.md').read_text(),

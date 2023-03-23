@@ -39,7 +39,7 @@ the bucket which you want to restore. You **MUST** specify
 `--b2-versions` to include all file versions, e.g:
 
 ```
-rclone sync --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files
+rclone sync --b2-versions --fast-list B2:mybucket b2files
 ```
 
 The above command will copy all files and available versions to the
@@ -101,7 +101,7 @@ Say you run a rclone backup every night at 0000 am to B2:mybucket.
 2. On 02-Jan you delete file `a.txt`.
 3. On 03-Jan you create file `a.txt` again (but with different content to 01-Jan).
 4. On 04-Jan you retrieve the latest archive using `rclone sync
-   --b2-versions --fast-list --transfers=4 $* B2:mybucket b2files`.
+   --b2-versions --fast-list B2:mybucket b2files`.
 
 If you run `b2restore b2files outdir` then you will get the latest
 03-Jan version of `a.txt` in `outdir`. If you then run `b2restore -t<time>

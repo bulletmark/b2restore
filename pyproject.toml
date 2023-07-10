@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "b2restore"
+description = "Program to recreate Backblaze B2 file archive at specified date+time"
+readme = "README.md"
+requires-python = ">=3.6"
+keywords = ["backblaze", "b2"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+]
+dynamic = ["version"]
+
+[[project.authors]]
+name = "Mark Blakeney"
+email = "mark.blakeney@bullet-systems.net"
+
+[project.urls]
+Homepage = "https://github.com/bulletmark/b2restore"
+
+[project.scripts]
+b2restore = "b2restore:main"
+
+[project.license]
+text = "GPLv3"
+
+[tool.setuptools]
+script-files = ["b2restore-create-dummy-files", "b2restore-create-git"]
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+
+[tool.mypy]
+implicit_optional = true
+warn_no_return = false
+allow_untyped_globals = true
+allow_redefinition = true
+
+[tool.edit-lint]
+linters = [
+  "ruff",
+  "flake8",
+  "mypy",
+]
+
+# vim:se sw=2:

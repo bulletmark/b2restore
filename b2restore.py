@@ -2,15 +2,15 @@
 'Program to recreate Backblaze B2 file archive at specified date and time.'
 # Author: Mark Blakeney, May 2018.
 
-import sys
+import argparse
+import filecmp
 import os
 import re
+import sys
 import time
-import filecmp
-import argparse
+from bisect import bisect
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from bisect import bisect
 
 # Format of input and output datetimes
 TIMEFMT = '%Y-%m-%dT%H:%M.%S'

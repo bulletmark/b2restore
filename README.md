@@ -9,29 +9,33 @@ for any given date and time. Alternatively, you can create a git
 repository of all date and time snapshots (subject to the
 [limitations](#limitations) described below).
 
-### INSTALLATION
+## Installation
 
 Arch users can install [b2restore from the
 AUR](https://aur.archlinux.org/packages/b2restore/).
 
 Python 3.6 or later is required. Note [b2restore is on
 PyPI](https://pypi.org/project/b2restore/) so just ensure that
-`python3-pip` and `python3-wheel` are installed then type the following
-to install (or upgrade):
+[`python-pipx`](https://pypa.github.io/pipx/) is installed then type the
+following to install:
 
-```
-$ sudo pip3 install -U b2restore
-```
-
-Or, to install from this source repository:
-
-```
-$ git clone http://github.com/bulletmark/b2restore
-$ cd b2restore
-$ sudo pip3 install .
+```bash
+$ pipx install b2restore
 ```
 
-### CREATION OF INITIAL RCLONE COPY
+To upgrade:
+
+```bash
+$ pipx upgrade b2restore
+```
+
+To remove:
+
+```bash
+$ pipx uninstall b2restore
+```
+
+## Creation of initial rclone copy
 
 This utility is typically used with [rclone](https://rclone.org/).
 Simply `rclone sync` or `rclone copy` the B2 bucket or sub-paths from
@@ -45,7 +49,7 @@ rclone sync --b2-versions --fast-list B2:mybucket b2files
 The above command will copy all files and available versions to the
 created `b2files` directory. You only need to do this once.
 
-### CREATION OF SNAPSHOT AT GIVEN TIME
+## Creation of snapshot at given time
 
 Given the above `rclone` initial copy, you run this utility to
 create a snapshot of the directory tree for the time you are interested
@@ -84,7 +88,7 @@ top level `.git/` repo on each run.
 Note that this utility does not recreate empty directory hierarchies.
 All empty directories in the target tree are deleted.
 
-### LIMITATIONS
+## Limitations
 
 If you want to restore a snapshot of your files for a specific
 date/time, then unfortunately the metadata returned by
@@ -113,7 +117,7 @@ b2restore to find and restore one or more files for specific date/times, then
 this is not a serious practical problem. There may be some extra files
 around, but all files are correct for the specified date/time.
 
-#### B2RESTORE COMMAND LINE OPTIONS
+## Command line options
 
 ```
 usage: b2restore [-h] [-t TIME | -f FILETIME] [-s] [-g] [-p PATH]
@@ -128,7 +132,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -t TIME, --time TIME  set time YYYY-MM-DDTHH:MM.SS, default=latest
+  -t TIME, --time TIME  set time YYYY-MM-DD[THH:MM[.SS]], default=latest
   -f FILETIME, --filetime FILETIME
                         set time based on specified file
   -s, --summary         just print a summary of files and versions
@@ -136,7 +140,7 @@ options:
   -p PATH, --path PATH  only process files under given path
 ```
 
-### CREATION OF GIT REPOSITORY OF ALL SNAPSHOTS
+## Creation of git repository of all snapshots
 
 Rather than run `b2restore` for the given date + times you are
 interested in, you can instead choose to run the provided
@@ -153,7 +157,7 @@ b2restore-create-git b2files outdir
 
 Then `cd outdir` and run `git log` etc to view the history.
 
-#### B2RESTORE-CREATE-GIT COMMAND LINE OPTIONS
+### b2restore-create-git command line options
 
 ```
 Usage: b2restore-create-git [-options] indir outdir
@@ -164,7 +168,7 @@ Options:
 -p (only process files under given path)
 ```
 
-### TEST RUN UTILITY
+## Test run utility
 
 A command line utility `b2restore-create-dummy-files` is included to
 facilitate testing `b2restore` on your restored file tree without
@@ -192,7 +196,7 @@ b2restore -t 2018-05-10T12:00.00 b2files outdir
 du -shl outdir # (see how much storage tree of yesterdays versions uses)
 ```
 
-#### B2RESTORE-CREATE-DUMMY-FILES COMMAND LINE OPTIONS
+### b2restore-create-dummy-files command line options
 
 ```
 Usage: b2restore-create-dummy-files [-options] outdir
@@ -204,7 +208,7 @@ Options:
 -p (only process files under given path)
 ```
 
-### LICENSE
+## License
 
 Copyright (C) 2018 Mark Blakeney. This program is distributed under the
 terms of the GNU General Public License.

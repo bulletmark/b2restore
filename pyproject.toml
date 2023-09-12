@@ -37,6 +37,7 @@ implicit_optional = true
 warn_no_return = false
 allow_untyped_globals = true
 allow_redefinition = true
+disable_error_code = ["var-annotated"]
 
 [tool.edit-lint]
 linters = [

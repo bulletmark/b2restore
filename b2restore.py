@@ -6,11 +6,11 @@ import argparse
 import filecmp
 import os
 import re
-import sys
 import time
 from bisect import bisect
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Callable
 
 # Format of input and output datetimes
 TIMEFMT = '%Y-%m-%dT%H:%M.%S'
@@ -20,34 +20,9 @@ outdir = None
 exgit = []
 args = None
 
-class FileName:
-    'Class to manage canonical file paths'
-    namemap = {}
-
-    def __init__(self, name):
-        self.namemap[name] = self
-        self.name = name
-        self.times = []
-        self.paths = []
-
-    def add(self, path):
-        'Insert the versioned file into list of sorted times'
-        ix = bisect(self.times, path.time)
-        if ix > 0:
-            opath = self.paths[ix - 1]
-            # If this file looks to be the same as another then prefer
-            # the non-versioned file
-            if opath.time == path.time:
-                if opath.version and not path.version:
-                    self.paths[ix - 1] = path
-                return
-
-        self.times.insert(ix, path.time)
-        self.paths.insert(ix, path)
-
 class FileVersion:
     'Class to manage all versioned file paths'
-    def __init__(self, path, subpath):
+    def __init__(self, path: Path, subpath: Path):
         stat = path.stat()
         self.path = subpath
         self.size = stat.st_size
@@ -77,10 +52,35 @@ class FileVersion:
         fver = fver.replace(tzinfo=timezone.utc)
         self.version = fver.astimezone().replace(tzinfo=None)
 
-def parsefile(path):
+class FileName:
+    'Class to manage canonical file paths'
+    namemap = {}
+
+    def __init__(self, name: str):
+        self.namemap[name] = self
+        self.name = name
+        self.times = []
+        self.paths = []
+
+    def add(self, fver: FileVersion) -> None:
+        'Insert the versioned file into list of sorted times'
+        ix = bisect(self.times, fver.time)
+        if ix > 0:
+            opath = self.paths[ix - 1]
+            # If this file looks to be the same as another then prefer
+            # the non-versioned file
+            if opath.time == fver.time:
+                if opath.version and not fver.version:
+                    self.paths[ix - 1] = fver
+                return
+
+        self.times.insert(ix, fver.time)
+        self.paths.insert(ix, fver)
+
+def parsefile(path: Path) -> None:
     'Parse given file'
-    subpath = path.relative_to(indir)
-    if args.path and not str(subpath).startswith(args.path):
+    subpath = path.relative_to(indir)  # type: ignore
+    if args.path and not str(subpath).startswith(args.path):  # type:ignore
         return
 
     fver = FileVersion(path, subpath)
@@ -91,7 +91,7 @@ def parsefile(path):
     # Add this file instance into the list of versions
     fname.add(fver)
 
-def parsedir(dirpath, func):
+def parsedir(dirpath: Path, func: Callable[[Path], None]) -> None:
     'Parse given dir and apply func() to files found'
     for f in dirpath.iterdir():
         if f.is_dir():
@@ -102,11 +102,11 @@ def parsedir(dirpath, func):
 # Keep valid file list
 validfiles = set()
 
-def fmttime(dtime):
+def fmttime(dtime: datetime) -> str:
     'Return string rep of given time'
     return dtime.strftime(TIMEFMT)
 
-def addfile(fp, infile, outfile):
+def addfile(fp: FileVersion, infile: Path, outfile: Path) -> None:
     'Copy infile to outfile if changed'
     validfiles.add(fp.name)
     if outfile.exists():
@@ -121,9 +121,9 @@ def addfile(fp, infile, outfile):
     print(f'{action} {fmttime(fp.time)}: {fp.name}')
     os.link(infile, outfile)
 
-def delfile(path):
+def delfile(path: Path) -> None:
     'Delete given file if not needed anymore'
-    ipath = path.relative_to(outdir)
+    ipath = path.relative_to(outdir)  # type: ignore
     if ipath.parts[0] in exgit:
         return
     if str(ipath) not in validfiles:
@@ -131,7 +131,7 @@ def delfile(path):
         print(f'deleting {vers}: {ipath}')
         path.unlink()
 
-def main():
+def main() -> None:
     'Main code'
     global indir, outdir, args
 
@@ -205,7 +205,7 @@ def main():
         argstime = None
 
     # Parse all files in the versioned indir
-    parsedir(indir, parsefile)
+    parsedir(indir, parsefile)  # type:ignore
 
     if args.summary:
         fnames = sorted(FileName.namemap)
@@ -219,6 +219,7 @@ def main():
 
     # Iterate through all files and restore version for given time
     for fname in FileName.namemap.values():
+        index = 0
         for index, tm in enumerate(fname.times):
             if argstime and tm > argstime:
                 break
@@ -238,16 +239,17 @@ def main():
             addfile(fp, indir / fp.path, outdir / fname.name)
 
     # Delete any leftover files
-    parsedir(outdir, delfile)
+    parsedir(outdir, delfile)  # type:ignore
 
     # Delete all leftover empty dirs
-    for root, dirs, files in os.walk(outdir, topdown=False):
+    for root, dirs, files in os.walk(outdir, topdown=False):  # type:ignore
         for name in dirs:
-            dird = Path(root, name)
+            dird = Path(root, name)  # type: ignore
             if dird.parts[0] not in exgit:
                 if not any(dird.iterdir()) and dird != outdir:
-                    print(f'deleting empty {dird.relative_to(outdir)}')
+                    print('deleting empty '
+                          f'{dird.relative_to(outdir)}')  # type: ignore
                     dird.rmdir()
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "b2restore"
 description = "Program to recreate Backblaze B2 file archive at specified date+time"
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 keywords = ["backblaze", "b2"]
 classifiers = [
   "Programming Language :: Python :: 3",

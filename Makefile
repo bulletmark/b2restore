@@ -5,6 +5,7 @@ check:
 	ruff $(PYNAME).py
 	flake8 $(PYNAME).py
 	mypy $(PYNAME).py
+	pyright $(PYNAME).py
 	shellcheck $(PYNAME)-*
 	vermin -vv --no-tips -i $(PYNAME).py
 

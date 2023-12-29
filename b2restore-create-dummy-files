@@ -21,7 +21,7 @@ while getopts zsp: c; do
     case $c in
     z) ZERO="-z";;
     s) NOSIZE=1;;
-    p) SUBPATH=$OPTARG;;
+    p) SUBPATH=${OPTARG#/};;
     \?) usage;;
     esac
 done

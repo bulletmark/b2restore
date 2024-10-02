@@ -136,7 +136,7 @@ def main() -> None:
     global indir, outdir, args
 
     # Process command line options
-    opt = argparse.ArgumentParser(description=__doc__.strip())
+    opt = argparse.ArgumentParser(description=__doc__)
     grp = opt.add_mutually_exclusive_group()
     grp.add_argument('-t', '--time',
             help='set time YYYY-MM-DD[THH:MM[.SS]], default=latest')

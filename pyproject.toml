@@ -42,7 +42,6 @@ disable_error_code = ["var-annotated"]
 [tool.edit-lint]
 linters = [
   "ruff",
-  "flake8",
   "mypy",
   "pyright",
 ]

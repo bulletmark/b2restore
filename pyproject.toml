@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "b2restore"
 description = "Program to recreate Backblaze B2 file archive at specified date+time"
 readme = "README.md"
+license = "GPL-3.0-or-later"
 requires-python = ">=3.7"
 keywords = ["backblaze", "b2"]
 classifiers = [
@@ -22,9 +23,6 @@ Homepage = "https://github.com/bulletmark/b2restore"
 
 [project.scripts]
 b2restore = "b2restore:main"
-
-[project.license]
-text = "GPLv3"
 
 [tool.setuptools]
 script-files = ["b2restore-create-dummy-files", "b2restore-create-git"]

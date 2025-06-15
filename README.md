@@ -16,7 +16,7 @@ AUR](https://aur.archlinux.org/packages/b2restore/).
 
 Python 3.7 or later is required. Note [b2restore is on
 PyPI](https://pypi.org/project/b2restore/) so just ensure that
-[`python-pipx`](https://pypa.github.io/pipx/) is installed then type the
+[`python-pipx`](https://pipx.pypa.io/stable/) is installed then type the
 following to install:
 
 ```bash

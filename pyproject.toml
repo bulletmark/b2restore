@@ -37,11 +37,8 @@ allow_untyped_globals = true
 allow_redefinition = true
 disable_error_code = ["var-annotated"]
 
-[tool.edit-lint]
-linters = [
-  "ruff check",
-  "mypy",
-  "pyright",
-]
+[tool.ruff.format]
+quote-style = "single"
+skip-magic-trailing-comma = true
 
 # vim:se sw=2:

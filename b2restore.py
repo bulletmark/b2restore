@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-'Program to recreate Backblaze B2 file archive at specified date and time.'
+"Program to recreate Backblaze B2 file archive at specified date and time."
 # Author: Mark Blakeney, May 2018.
 
 import argparse
@@ -20,8 +20,10 @@ outdir = None
 exgit = []
 args = None
 
+
 class FileVersion:
-    'Class to manage all versioned file paths'
+    "Class to manage all versioned file paths"
+
     def __init__(self, path: Path, subpath: Path):
         stat = path.stat()
         self.path = subpath
@@ -33,8 +35,7 @@ class FileVersion:
         # Find B2 version string in file name. I will admit I don't
         # understand the logic of where they embed the version string so
         # this is crude.
-        match = re.search(r'^(.+)-v(20\d{2}-\d{2}-\d{2}-\d{6}-\d{3})(.*)$',
-                self.name)
+        match = re.search(r'^(.+)-v(20\d{2}-\d{2}-\d{2}-\d{6}-\d{3})(.*)$', self.name)
         if not match:
             return
 
@@ -52,8 +53,10 @@ class FileVersion:
         fver = fver.replace(tzinfo=timezone.utc)
         self.version = fver.astimezone().replace(tzinfo=None)
 
+
 class FileName:
-    'Class to manage canonical file paths'
+    "Class to manage canonical file paths"
+
     namemap = {}
 
     def __init__(self, name: str):
@@ -63,7 +66,7 @@ class FileName:
         self.paths = []
 
     def add(self, fver: FileVersion) -> None:
-        'Insert the versioned file into list of sorted times'
+        "Insert the versioned file into list of sorted times"
         ix = bisect(self.times, fver.time)
         if ix > 0:
             opath = self.paths[ix - 1]
@@ -77,8 +80,9 @@ class FileName:
         self.times.insert(ix, fver.time)
         self.paths.insert(ix, fver)
 
+
 def parsefile(path: Path) -> None:
-    'Parse given file'
+    "Parse given file"
     subpath = path.relative_to(indir)  # type: ignore
     if args.path and not str(subpath).startswith(args.path):  # type:ignore
         return
@@ -91,23 +95,27 @@ def parsefile(path: Path) -> None:
     # Add this file instance into the list of versions
     fname.add(fver)
 
+
 def parsedir(dirpath: Path, func: Callable[[Path], None]) -> None:
-    'Parse given dir and apply func() to files found'
+    "Parse given dir and apply func() to files found"
     for f in dirpath.iterdir():
         if f.is_dir():
             parsedir(f, func)
         else:
             func(f)
 
+
 # Keep valid file list
 validfiles = set()
 
+
 def fmttime(dtime: datetime) -> str:
-    'Return string rep of given time'
+    "Return string rep of given time"
     return dtime.strftime(TIMEFMT)
 
+
 def addfile(fp: FileVersion, infile: Path, outfile: Path) -> None:
-    'Copy infile to outfile if changed'
+    "Copy infile to outfile if changed"
     validfiles.add(fp.name)
     if outfile.exists():
         if filecmp.cmp(infile, outfile):
@@ -121,8 +129,9 @@ def addfile(fp: FileVersion, infile: Path, outfile: Path) -> None:
     print(f'{action} {fmttime(fp.time)}: {fp.name}')
     os.link(infile, outfile)
 
+
 def delfile(path: Path) -> None:
-    'Delete given file if not needed anymore'
+    "Delete given file if not needed anymore"
     ipath = path.relative_to(outdir)  # type: ignore
     if ipath.parts[0] in exgit:
         return
@@ -131,28 +140,38 @@ def delfile(path: Path) -> None:
         print(f'deleting {vers}: {ipath}')
         path.unlink()
 
+
 def main() -> None:
-    'Main code'
+    "Main code"
     global indir, outdir, args
 
     # Process command line options
     opt = argparse.ArgumentParser(description=__doc__)
     grp = opt.add_mutually_exclusive_group()
-    grp.add_argument('-t', '--time',
-            help='set time YYYY-MM-DD[THH:MM[.SS]], default=latest')
-    grp.add_argument('-f', '--filetime',
-            help='set time based on specified file')
-    opt.add_argument('-s', '--summary', action='store_true',
-            help='just print a summary of files and versions')
-    opt.add_argument('-g', '--gitkeep', action='store_true',
-            help='preserve any top level git dir in outdir')
-    opt.add_argument('-p', '--path',
-            help='only process files under given path')
-    opt.add_argument('indir',
-            help='input B2 archive containing all file versions '
-            ' (from --b2-versions)')
-    opt.add_argument('outdir', nargs='?',
-            help='output directory to recreate for given time')
+    grp.add_argument(
+        '-t', '--time', help='set time YYYY-MM-DD[THH:MM[.SS]], default=latest'
+    )
+    grp.add_argument('-f', '--filetime', help='set time based on specified file')
+    opt.add_argument(
+        '-s',
+        '--summary',
+        action='store_true',
+        help='just print a summary of files and versions',
+    )
+    opt.add_argument(
+        '-g',
+        '--gitkeep',
+        action='store_true',
+        help='preserve any top level git dir in outdir',
+    )
+    opt.add_argument('-p', '--path', help='only process files under given path')
+    opt.add_argument(
+        'indir',
+        help='input B2 archive containing all file versions  (from --b2-versions)',
+    )
+    opt.add_argument(
+        'outdir', nargs='?', help='output directory to recreate for given time'
+    )
     args = opt.parse_args()
 
     indir = Path(args.indir).expanduser()
@@ -199,8 +218,7 @@ def main() -> None:
 
         # Add a large fraction to ensure we match against file times which
         # include msecs.
-        argstime += timedelta(
-                seconds=(1 - time.clock_getres(time.CLOCK_MONOTONIC)))
+        argstime += timedelta(seconds=(1 - time.clock_getres(time.CLOCK_MONOTONIC)))
     else:
         argstime = None
 
@@ -212,8 +230,9 @@ def main() -> None:
         for fname in fnames:
             print(f'{fname}:')
             for fpath in FileName.namemap[fname].paths:
-                vers = fmttime(fpath.version) if fpath.version \
-                        else '----- current -----'
+                vers = (
+                    fmttime(fpath.version) if fpath.version else '----- current -----'
+                )
                 print(f'  {fmttime(fpath.time)} {vers} {fpath.size:8} B')
         return
 
@@ -234,8 +253,11 @@ def main() -> None:
 
         # If the latest version had a version string then this file may
         # have been deleted at this time
-        if index < len(fname.times) or not fp.version or \
-                (argstime and argstime <= fp.version):
+        if (
+            index < len(fname.times)
+            or not fp.version
+            or (argstime and argstime <= fp.version)
+        ):
             addfile(fp, indir / fp.path, outdir / fname.name)
 
     # Delete any leftover files
@@ -247,9 +269,9 @@ def main() -> None:
             dird = Path(root, name)  # type: ignore
             if dird.parts[0] not in exgit:
                 if not any(dird.iterdir()) and dird != outdir:
-                    print('deleting empty '
-                          f'{dird.relative_to(outdir)}')  # type: ignore
+                    print(f'deleting empty {dird.relative_to(outdir)}')  # type: ignore
                     dird.rmdir()
+
 
 if __name__ == '__main__':
     main()

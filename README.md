@@ -16,23 +16,23 @@ AUR](https://aur.archlinux.org/packages/b2restore/).
 
 Python 3.7 or later is required. Note [b2restore is on
 PyPI](https://pypi.org/project/b2restore/) so just ensure that
-[`python-pipx`](https://pipx.pypa.io/stable/) is installed then type the
+[`uv`](https://docs.astral.sh/uv/concepts/tools/) is installed then type the
 following to install:
 
 ```bash
-$ pipx install b2restore
+$ uv tool install b2restore
 ```
 
 To upgrade:
 
 ```bash
-$ pipx upgrade b2restore
+$ uv tool upgrade b2restore
 ```
 
 To remove:
 
 ```bash
-$ pipx uninstall b2restore
+$ uv tool uninstall b2restore
 ```
 
 ## Creation of initial rclone copy

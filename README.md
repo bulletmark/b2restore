@@ -119,6 +119,8 @@ around, but all files are correct for the specified date/time.
 
 ## Command line options
 
+Type `b2restore -h` to view the usage summary:
+
 ```
 usage: b2restore [-h] [-t TIME | -f FILETIME] [-s] [-g] [-p PATH]
                  indir [outdir]
@@ -132,12 +134,12 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -t TIME, --time TIME  set time YYYY-MM-DD[THH:MM[.SS]], default=latest
-  -f FILETIME, --filetime FILETIME
+  -t, --time TIME       set time YYYY-MM-DD[THH:MM[.SS]], default=latest
+  -f, --filetime FILETIME
                         set time based on specified file
   -s, --summary         just print a summary of files and versions
   -g, --gitkeep         preserve any top level git dir in outdir
-  -p PATH, --path PATH  only process files under given path
+  -p, --path PATH       only process files under given path
 ```
 
 ## Creation of git repository of all snapshots

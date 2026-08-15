@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 "Program to recreate Backblaze B2 file archive at specified date and time."
 # Author: Mark Blakeney, May 2018.
 
@@ -10,7 +9,7 @@ import time
 from bisect import bisect
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Callable
+from typing import Callable, ClassVar
 
 # Format of input and output datetimes
 TIMEFMT = '%Y-%m-%dT%H:%M.%S'
@@ -57,7 +56,7 @@ class FileVersion:
 class FileName:
     "Class to manage canonical file paths"
 
-    namemap = {}
+    namemap: ClassVar = {}
 
     def __init__(self, name: str):
         self.namemap[name] = self
@@ -223,7 +222,7 @@ def main() -> None:
         argstime = None
 
     # Parse all files in the versioned indir
-    parsedir(indir, parsefile)  # type:ignore
+    parsedir(indir, parsefile)
 
     if args.summary:
         fnames = sorted(FileName.namemap)
@@ -264,13 +263,16 @@ def main() -> None:
     parsedir(outdir, delfile)  # type:ignore
 
     # Delete all leftover empty dirs
-    for root, dirs, files in os.walk(outdir, topdown=False):  # type:ignore
+    for root, dirs, files in os.walk(outdir, topdown=False):
         for name in dirs:
-            dird = Path(root, name)  # type: ignore
-            if dird.parts[0] not in exgit:
-                if not any(dird.iterdir()) and dird != outdir:
-                    print(f'deleting empty {dird.relative_to(outdir)}')  # type: ignore
-                    dird.rmdir()
+            dird = Path(root, name)
+            if (
+                dird.parts[0] not in exgit
+                and not any(dird.iterdir())
+                and dird != outdir
+            ):
+                print(f'deleting empty {dird.relative_to(outdir)}')  # type: ignore
+                dird.rmdir()
 
 
 if __name__ == '__main__':
